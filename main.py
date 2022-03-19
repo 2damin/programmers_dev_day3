@@ -81,7 +81,9 @@ def main():
     #LeNet5
     
     if args.mode == "train":
-        model = _model(batch = 4, n_classes=1000, in_channel=1, in_width=224, in_height=224, is_train=True)
+        model = _model(batch = 4, n_classes=1000, in_channel=3, in_width=224, in_height=224, is_train=True)
+        checkpoint = torch.load(args.checkpoint, map_location=device)
+        model.load_state_dict(checkpoint['state_dict'])
         model.to(device)
         model.train()
         
@@ -124,7 +126,7 @@ def main():
             torch.save(model.state_dict(), args.output_dir + "/model_epoch"+str(e)+".pt")
         print("Train end")
     elif args.mode == "eval":
-        model = _model(batch = 1, n_classes=10, in_channel=1, in_width=32, in_height=32)
+        model = _model(batch = 1, n_classes=1000, in_channel=3, in_width=224, in_height=224)
         #load trained model
         checkpoint = torch.load(args.checkpoint)
         model.load_state_dict(checkpoint)
