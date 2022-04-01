@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 def ConvBlock(in_c, out_c, kernel, pad, stride):
-        conv = nn.Conv2d(in_c, out_c, kernel, pad, stride, bias=False)
+        conv = nn.Conv2d(in_c, out_c, kernel, stride, pad, bias=False)
         bn = nn.BatchNorm2d(out_c)
         act = nn.LeakyReLU()
         return nn.Sequential(*[conv,bn,act])
@@ -53,17 +53,17 @@ class DarkNet53(nn.Module):
     
     def forward(self, x):
 
-        x = self.conv0(x)
         x = self.conv1(x)
-        x = self.resblock2(x) 
+        x = self.conv2(x)
+        x = self.residual_block1(x)
         x = self.conv3(x)
-        x = self.resblock4(x) 
+        x = self.residual_block2(x) 
+        x = self.conv4(x)
+        x = self.residual_block3(x) 
         x = self.conv5(x)
-        x = self.resblock6(x) 
-        x = self.conv7(x)
-        x = self.resblock8(x) 
-        x = self.conv9(x)
-        x = self.resblock10(x)
+        x = self.residual_block4(x) 
+        x = self.conv6(x)
+        x = self.residual_block5(x)
         x = self.gap(x)
         x = x.view(-1,1024)
         x = self.fc(x)

@@ -45,13 +45,12 @@ def main():
     train_dir = os.path.join(args.data, 'train')
     valid_dir = os.path.join(args.data, 'val')
     
-    train_transform = transforms.Compose([transforms.RandomResizedCrop(224),
+    train_transform = transforms.Compose([transforms.Resize(64),
                                           transforms.RandomHorizontalFlip(),
                                           transforms.ToTensor(),
                                           transforms.Normalize(mean=[0.485,0.456,0.406],
                                                                std=[0.229, 0.224, 0.225])])
-    valid_transform = transforms.Compose([transforms.Resize(256),
-                                          transforms.CenterCrop(224),
+    valid_transform = transforms.Compose([transforms.Resize(64),
                                           transforms.ToTensor(),
                                           transforms.Normalize(mean=[0.485,0.456,0.406],
                                                                std=[0.229, 0.224, 0.225])])
@@ -64,7 +63,7 @@ def main():
     
     #Make Dataloader
     train_loader = DataLoader(train_dataset,
-                              batch_size=4,
+                              batch_size=8,
                               num_workers=0,
                               pin_memory=True,
                               drop_last=True,
@@ -81,9 +80,17 @@ def main():
     #LeNet5
     
     if args.mode == "train":
-        model = _model(batch = 4, n_classes=1000, in_channel=3, in_width=224, in_height=224, is_train=True)
+        model = _model(batch = 8, n_classes=200, in_channel=3, in_width=64, in_height=64, is_train=True)
         checkpoint = torch.load(args.checkpoint, map_location=device)
-        model.load_state_dict(checkpoint['state_dict'])
+        pretrained_state_dict = checkpoint['state_dict']
+        model_state_dict = model.state_dict()                 
+        for key, value in pretrained_state_dict.items():
+            if key == 'fc.weight' or key == 'fc.bias':
+                continue
+            else:
+                model_state_dict[key] = value
+        
+        model.load_state_dict(model_state_dict)
         model.to(device)
         model.train()
         
@@ -126,7 +133,7 @@ def main():
             torch.save(model.state_dict(), args.output_dir + "/model_epoch"+str(e)+".pt")
         print("Train end")
     elif args.mode == "eval":
-        model = _model(batch = 1, n_classes=1000, in_channel=3, in_width=224, in_height=224)
+        model = _model(batch = 1, n_classes=200, in_channel=3, in_width=64, in_height=64)
         #load trained model
         checkpoint = torch.load(args.checkpoint)
         model.load_state_dict(checkpoint)
