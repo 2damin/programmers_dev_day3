@@ -1,8 +1,31 @@
-# programmers_dev_day3
+# programmers_dev_day3 - Image classification
 
-## DarkNet53 Classification
+## DarkNet53 binary classification
 
-### Dataset : ImageNet
+### Dataset : Dog vs Cat
+
+[link](https://www.kaggle.com/competitions/dogs-vs-cats/data)
+
+### Model : Darknet53
+
+- pretrained weights : [link](https://drive.google.com/file/d/1keZwVIfcWmxfTiswzOKUwkUz2xjvTvfm/view)
+
+### Use
+
+#### Prerequisite
+
+Recommend to use virtual environments(Docker or conda)
+
+```bash
+pip install -r requirements.txt
+```
+
+#### Run
+
+```bash
+python main.py --mode ${train/eval} --output_dir ${output_path} --checkpoint ${pretrained_weight_path} --data ${data_directory_path}
+```
+
 
 
 
