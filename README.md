@@ -26,6 +26,13 @@ pip install -r requirements.txt
 python main.py --mode ${train/eval} --output_dir ${output_path} --checkpoint ${pretrained_weight_path} --data ${data_directory_path}
 ```
 
+#### Use Tensorboard
+
+```bash
+tensorboard --logdir=${output_path} --port 8888
+```
+
+you can visualize the loss graph in localhost:8888
 
 
 
