@@ -13,7 +13,7 @@ from tensorboardX import SummaryWriter
 
 N_CLASSES = 1
 def parse_args():
-    parser = argparse.ArgumentParser(description="MNIST")
+    parser = argparse.ArgumentParser(description="darknet53")
     parser.add_argument('--mode', dest='mode', help="train / eval",
                         default=None, type=str)
     parser.add_argument('--output_dir', dest='output_dir', help="output directory",
@@ -84,15 +84,7 @@ def main():
                              pin_memory=True,
                              drop_last=False,
                              shuffle=True)
-    
-    #numger of data per each class
-    num_data_class = torch.unique(torch.tensor(train_dataset.targets), return_counts=True)
-    #total counts
-    total_counts = torch.sum(num_data_class[1])
-    #cross-entropy weights
-    ce_weights = torch.tensor([1 - t / total_counts for t in num_data_class[1]], dtype=torch.float32)
-    print(ce_weights)
-    
+
     _model = get_model('Darknet53')
 
     if args.mode == "train":
@@ -104,12 +96,15 @@ def main():
             pretrained_state_dict = checkpoint['state_dict']
             model_state_dict = model.state_dict()                 
             for key, value in pretrained_state_dict.items():
+                # skip fully-connected layer in pretrained weights.
+                # because the ouput channel of fc layer is dependent on number of classes.
                 if key == 'fc.weight' or key == 'fc.bias':
                     continue
                 else:
                     model_state_dict[key] = value
         
             model.load_state_dict(model_state_dict)
+
         model.to(device)
         model.train()
         #optimizer & scheduler
@@ -158,7 +153,7 @@ def main():
             mean_loss = total_loss / i
             scheduler.step()
             
-            #evaluation
+            # evaluation per each epoch
             model.eval()
             acc = 0
             num_eval = 0
@@ -206,10 +201,7 @@ def main():
             out = model(img)
             
             out = torch.nn.functional.softmax(out,dim=1)
-            print(out.shape)
-            print(torch.max(out), out[0,torch.argmax(out)])
             out = torch.argmax(out)
-            print(out, gt)
             out = out.detach().cpu()
             
             score = out == gt
